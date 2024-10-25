@@ -17,15 +17,44 @@ fetch(statsUrl)
         // Task 1: Log today's total xp by user like so:
         // Username: 999999XP today, 100000000XP in total
         recordsToday.forEach(record => {
-        const username = record.username
-        const xpToday = record.xp_today; //Today's xp = xp_today
-        const totalXp = record.total_xp; //Total xp = total_xp
+        const user = record.user
+        const relative = record.relative; //Today's xp = xp_today
+        const absolute = record.absolute; //Total xp = total_xp
 
-        console.log(`${username}: ${xpToday}XP today, ${totalXp}XP in total`);
+        console.log(`${user}: ${relative}XP today, ${absolute}XP in total`);
     });
 })
        
         // Hint: Read the console log to check every row's attributes
        // I've assigned a const for username, today's xp and total xp
-
        
+var parent = document.createElement("table");
+parent.setAttribute("border", "1");
+document.body.appendChild(parent);
+
+var child=document.createElement("tr");
+parent.appendChild(child);
+
+var headers = ["Username", "RelativeXp", "TotalXp"];
+headers.forEach(function(headerText) {
+    var thElement = document.createElement("th");
+    thElement.innerText = headerText;
+    child.appendChild(thElement);
+});
+var data = [
+    { Username: "Gabriel", RelativeXp: 100, TotalXp: 24100 },
+    { Username: "Giancarlo", RelativeXp: 120, TotalXp: 30900 },
+    { Username: "Philipp", RelativeXp: 200, TotalXp: 50300 },
+    { Username: "Anna", RelativeXp: 170, TotalXp: 28900 }
+];
+data.forEach(function(rowData) {
+    var row = document.createElement("tr");
+
+    Object.values(rowData).forEach(function(cellData) {
+        var tdElement = document.createElement("td");
+        tdElement.innerText = cellData;
+        row.appendChild(tdElement);
+    });
+
+    parent.appendChild(row);
+});
