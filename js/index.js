@@ -22,12 +22,60 @@ fetch(statsUrl)
         const absolute = record.absolute; //Total xp = total_xp
 
         console.log(`${user}: ${relative}XP today, ${absolute}XP in total`);
-    });
+    }); 
+    const japaneseXpByUser = data.records
+    .filter(row => row.language === 'ja') // Filter for Japanese language
+    .filter(row => row.date === todayString)
+    .reduce((acc, row) => {
+        // Group by user and sum the 'absolute' values
+        acc[row.user] = (acc[row.user] || 0) + row.absolute;
+        return acc;
+    }, {});
+
+    const tableBody = document.getElementById('data-table').querySelector('tbody');
+   
+
+    // Only show records where language is "total"
+
+   recordsToday
+      .forEach(record => {
+        const row = document.createElement('tr');
+  
+        const bundleDateCell = document.createElement('td');
+        const recordDateCell = document.createElement('td');
+        const userCell = document.createElement('td');
+        const absoluteCell = document.createElement('td');
+        const relativeCell = document.createElement('td');
+        const japaneseXpCell = document.createElement('td'); // New column for Japanese XP
+
+  
+        // Fill the cells with data
+       
+        recordDateCell.textContent = new Date(record.date).toLocaleString();
+        userCell.textContent = record.user;
+        absoluteCell.textContent = record.absolute;
+        relativeCell.textContent = record.relative;
+        japaneseXpCell.textContent = japaneseXpByUser[record.user] || 0; // Display total Japanese XP for the user
+
+  
+        // Append cells to the row
+        row.appendChild(bundleDateCell);
+        row.appendChild(recordDateCell);
+        row.appendChild(userCell);
+        row.appendChild(absoluteCell);
+        row.appendChild(relativeCell);
+        row.appendChild(japaneseXpCell); // Append the new column                 
+  
+        // Append row to the table body
+        tableBody.appendChild(row);
+      });
+
 })
        
         // Hint: Read the console log to check every row's attributes
        // I've assigned a const for username, today's xp and total xp
-       
+//Example of a table using DOM manipulation
+ /*      
 var parent = document.createElement("table");
 parent.setAttribute("border", "1");
 document.body.appendChild(parent);
@@ -58,3 +106,7 @@ data.forEach(function(rowData) {
 
     parent.appendChild(row);
 });
+*/
+// New table using real-time data
+
+
