@@ -71,6 +71,69 @@ fetch(statsUrl)
       });
 
 })
+fetch(statsUrl)
+  .then(response => response.json())
+  .then(data => {
+    // Get today's date and calculate the past 7 days
+    const dates = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setUTCHours(0, 0, 0, 0);
+      return date.toISOString();
+    }).reverse(); // Reverse to make oldest first
+
+    // Map data for the past 7 days
+    const xpDataByUser = {};
+    dates.forEach(date => {
+      const records = data.records
+        .filter(row => row.language === 'total')
+        .filter(row => row.date === date);
+
+      records.forEach(record => {
+        const user = record.user;
+        const relativeXp = record.relative;
+
+        // Initialize user data
+        if (!xpDataByUser[user]) {
+          xpDataByUser[user] = Array(7).fill(0); //Check if this ever happens
+        }
+
+        // Add relative XP to the correct day index
+        const dayIndex = dates.indexOf(date);
+        xpDataByUser[user][dayIndex] = relativeXp;
+      });
+    });
+
+    // Prepare data for Chart.js
+    const datasets = Object.keys(xpDataByUser).map(user => ({
+      label: user,
+      data: xpDataByUser[user],
+      borderWidth: 2,
+      fill: false,
+    }));
+
+    // Create the line chart
+    const ctx = document.getElementById('xpChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates.map(date => new Date(date).toLocaleDateString()), // Y-axis: dates
+        datasets: datasets, // X-axis: relative XP data
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+        },
+        scales: {
+          x: { title: { display: true, text: 'Relative XP' } },
+          y: { title: { display: true, text: 'Date' } },
+        },
+      },
+    });
+  });
        
         // Hint: Read the console log to check every row's attributes
        // I've assigned a const for username, today's xp and total xp
