@@ -69,7 +69,7 @@ fetch(statsUrl)
         // Append row to the table body
         tableBody.appendChild(row);
       });
-
+//Relative xp chart
 })
 fetch(statsUrl)
   .then(response => response.json())
@@ -134,7 +134,134 @@ fetch(statsUrl)
       },
     });
   });
+//Absolute xp chart 2
+  fetch(statsUrl)
+  .then(response => response.json())
+  .then(data => {
+    // Get all unique dates from the data
+    const uniqueDates = Array.from(new Set(data.records.map(record => record.date))).sort();
+
+    // Map data for all dates
+    const xpDataByUser = {};
+    uniqueDates.forEach(date => {
+      const records = data.records
+        .filter(row => row.language === 'total')
+        .filter(row => row.date === date);
+
+      records.forEach(record => {
+        const user = record.user;
+        const absoluteXp = record.absolute;
+
+        // Initialize user data
+        if (!xpDataByUser[user]) {
+          xpDataByUser[user] = Array(uniqueDates.length).fill(0);
+        }
+
+        // Add absolute XP to the correct day index
+        const dayIndex = uniqueDates.indexOf(date);
+        xpDataByUser[user][dayIndex] = absoluteXp;
+      });
+    });
+
+    // Prepare data for Chart.js
+    const datasets = Object.keys(xpDataByUser).map(user => ({
+      label: user,
+      data: xpDataByUser[user],
+      borderColor: getRandomColor(),
+      borderWidth: 2,
+      fill: false,
+    }));
+
+    // Create the line chart for absolute XP data
+    const ctxAbsolute = document.getElementById('absoluteXpChart2').getContext('2d');
+    new Chart(ctxAbsolute, {
+      type: 'line',
+      data: {
+        labels: uniqueDates.map(date => new Date(date).toLocaleDateString()), // X-axis: dates
+        datasets: datasets, // Y-axis: absolute XP data
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+        },
+        scales: {
+          x: { title: { display: true, text: 'Date' } },
+          y: { title: { display: true, text: 'Absolute XP' } },
+        },
+      },
+    });
+
+    // Generate random color for each user
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+  });
        
+
+  //Days were users most use Duolingo
+  fetch(statsUrl)
+    .then(response => response.json())
+    .then(data => {
+        // Create an object to count occurrences of each weekday
+        const weekdayCount = { "Sunday": 0, "Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0, "Saturday": 0 };
+
+        // Iterate through records and count occurrences by day of the week
+        data.records.forEach(record => {
+            const date = new Date(record.date);
+            const dayName = date.toLocaleString('en-US', { weekday: 'long' });
+            weekdayCount[dayName] += 1; //Fix later, add different count
+        });
+
+        console.log("Weekday Usage Frequency:", weekdayCount);
+
+        // Prepare data for Chart.js
+        const labels = Object.keys(weekdayCount);
+        const values = Object.values(weekdayCount);
+
+        // Create the chart
+        const ctx = document.getElementById('usageChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Duolingo Usage Frequency',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
+                        'rgba(100, 200, 100, 0.6)'
+                    ],
+                    borderColor: 'rgba(0, 0, 0, 0.3)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Fetch error:', error));
+
+  
+
         // Hint: Read the console log to check every row's attributes
        // I've assigned a const for username, today's xp and total xp
 //Example of a table using DOM manipulation
@@ -167,9 +294,4 @@ data.forEach(function(rowData) {
         row.appendChild(tdElement);
     });
 
-    parent.appendChild(row);
-});
-*/
-// New table using real-time data
-
-
+    parent.appendChild(row) */
